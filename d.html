@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dompet Digital</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body {
+      margin: 0;
+      background: #f2f4f8;
+      color: #1f2937;
+    }
+
+    /* Container utama */
+    .app {
+      max-width: 420px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.06);
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0052cc, #0070f5);
+      color: #fff;
+      padding: 20px 16px 70px;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      position: relative;
+    }
+    .header .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .header .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .header .user-info {
+      font-size: 0.9rem;
+      opacity: 0.95;
+    }
+    .header .saldo-label {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+    .header .saldo-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    /* Card konten di atas header (overlap) */
+    .content-card {
+      background: #fff;
+      border-radius: 16px;
+      margin: -40px 16px 16px;
+      padding: 16px;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    /* Tombol aksi */
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f7f9fc;
+      border: 1px solid #e5e9f2;
+      border-radius: 12px;
+      padding: 10px 6px;
+      font-size: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.08s ease, background 0.15s ease;
+    }
+    .action-btn:active {
+      transform: scale(0.96);
+      background: #eef2f9;
+    }
+    .action-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+      font-size: 1rem;
+      color: #fff;
+      background: #0070f5;
+    }
+
+    /* Form section */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 10px 0 8px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .form-group input:focus {
+      border-color: #0070f5;
+      box-shadow: 0 0 0 3px rgba(0,112,245,0.12);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.06s ease, opacity 0.12s ease;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn-primary {
+      background: #0070f5;
+      color: #fff;
+    }
+    .btn-success {
+      background: #10b981;
+      color: #fff;
+    }
+    .btn-danger {
+      background: #ef4444;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #1f2937;
+    }
+
+    /* Riwayat */
+    .history {
+      margin-top: 14px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 12px;
+    }
+    .history h3 {
+      font-size: 0.95rem;
+      margin: 0 0 8px;
+    }
+    .tx-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    .tx-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .tx-type {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 700;
+    }
+    .tx-in { background: #10b981; }
+    .tx-out { background: #ef4444; }
+    .tx-amount {
+      font-weight: 700;
+    }
+    .tx-meta {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    /* Login / Register overlay */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 16px;
+    }
+    .auth-overlay.active {
+      display: flex;
+    }
+    .auth-card {
+      background: #fff;
+      width: 100%;
+      max-width: 360px;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .auth-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-align: center;
+      margin: 0 0 14px;
+    }
+    .auth-note {
+      font-size: 0.85rem;
+      color: #6b7280;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .auth-switch {
+      text-align: center;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+    .auth-switch a {
+      color: #0070f5;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Halaman */
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+
+    .footer-note {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: 16px;
+      padding-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Overlay Login / Register -->
+    <div class="auth-overlay active" id="authOverlay">
+      <div class="auth-card">
+        <h2 class="auth-title" id="authTitle">Masuk</h2>
+        <p class="auth-note" id="authNote">Gunakan nomor HP dan password untuk masuk.</p>
+
+        <!-- Form Login -->
+        <div id="loginForm">
+          <div class="form-group">
+            <label for="loginPhone">Nomor HP</label>
+            <input type="text" id="loginPhone" placeholder="08123456789" />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="******" />
+          </div>
+          <button class="btn btn-primary" id="btnLogin">Masuk</button>
+          <div class="auth-switch">
+            Belum punya akun? <a id="toRegister">Daftar</a>
+          </div>
+        </div>
+
+        <!-- Form Register -->
+        <div id="registerForm" style="display:none;">
+          <div class="form-group">
+            <label for="regName">Nama</label>
+            <input type="text" id="regName" placeholder="Nama lengkap" />
+          </div>
+          <div class="form-group">
+            <label for="regPhone">Nomor HP</label>
+            <input type="text" id="regPhone" placeholder="08123456789" />
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword" placeholder="Minimal 6 karakter" />
+          </div>
+          <button class="btn btn-success" id="btnRegister">Daftar</button>
+          <div class="auth-switch">
+            Sudah punya akun? <a id="toLogin">Masuk</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Halaman Utama (Dashboard) -->
+    <div class="page active" id="dashboardPage">
+      <div class="header">
+        <div class="top">
+          <div class="logo">Dompet Digital</div>
+          <div class="user-info" id="headerUserName">Halo, User</div>
+        </div>
+        <div class="saldo-label">Saldo Anda</div>
+        <div class="saldo-amount" id="balanceDisplay">Rp 0</div>
+      </div>
+
+      <div class="content-card">
+        <!-- Tombol Aksi -->
+        <div class="actions">
+          <div class="action-btn" id="btnTopupAction">
+            <div class="action-icon">+</div>
+            <div>Isi Saldo</div>
+          </div>
+          <div class="action-btn" id="btnTransferAction">
+            <div class="action-icon">➤</div>
+            <div>Kirim</div>
+          </div>
+          <div class="action-btn" id="btnHistoryAction">
+            <div class="action-icon">↻</div>
+            <div>Riwayat</div>
+          </div>
+          <div class="action-btn" id="btnLogoutAction">
+            <div class="action-icon" style="background:#ef4444;">⏻</div>
+            <div>Keluar</div>
+          </div>
+        </div>
+
+        <!-- Section Isi Saldo -->
+        <div id="topupSection" style="display:none;">
+          <div class="section-title">Isi Saldo</div>
+          <div class="form-group">
+            <label for="topupAmount">Jumlah (Rp)</label>
+            <input type="number" id="topupAmount" placeholder="Contoh: 50000" min="1000" />
+          </div>
+          <button class="btn btn-success" id="btnTopup">Konfirmasi Isi Saldo</button>
+          <button class="btn btn-secondary" id="btnCancelTopup" style="margin-top:8px;">Batal</button>
+        </div>
+
+        <!-- Section Transfer -->
+        <div id="transferSection" style="display:none;">
+          <div class="section-title">Kirim Uang</div>
+          <div class="form-group">
+            <label for="transferPhone">Nomor HP Tujuan (angka saja)</label>
+            <input type="text" id="transferPhone" placeholder="08123456789" />
+          </div>
+          <div class="form-group">
+            <label for="transferAmount">Jumlah (Rp)</label>
+            <input type="number" id="transferAmount" placeholder="Contoh: 20000" min="1000" />
+          </div>
+          <button class="btn btn-primary" id="btnTransfer">Kirim Sekarang</button>
+          <button class="btn btn-secondary" id="btnCancelTransfer" style="margin-top:8px;">Batal</button>
+        </div>
+
+        <!-- Section Riwayat -->
+        <div class="history" id="historySection">
+          <h3>Riwayat Transaksi</h3>
+          <div id="historyList"></div>
+        </div>
+
+        <div class="footer-note">
+          Data hanya tersimpan di browser ini (demo).<br/>
+          Untuk aplikasi nyata, butuh server & keamanan.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================
+    // DATA & STORAGE
+    // =========================
+    const USERS_KEY = 'dd_users_v1';
+    const SESSION_KEY = 'dd_session_v1';
+    const WALLET_KEY = 'dd_wallet_v1';
+
+    function loadUsers() {
+      const raw = localStorage.getItem(USERS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+    function saveUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    function loadSession() {
+      const raw = localStorage.getItem(SESSION_KEY);
+      return raw ? JSON.parse(raw) : null; // { phone }
+    }
+    function saveSession(session) {
+      if (!session) {
+        localStorage.removeItem(SESSION_KEY);
+      } else {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      }
+    }
+
+    function loadWallet() {
+      const raw = localStorage.getItem(WALLET_KEY);
+      return raw ? JSON.parse(raw) : {
+        // phone -> { balance, transactions: [] }
+      };
+    }
+    function saveWallet(wallet) {
+      localStorage.setItem(WALLET_KEY, JSON.stringify(wallet));
+    }
+
+    // =========================
+    // AUTH LOGIC
+    // =========================
+    const authOverlay = document.getElementById('authOverlay');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const authTitle = document.getElementById('authTitle');
+    const authNote = document.getElementById('authNote');
+    const toRegister = document.getElementById('toRegister');
+    const toLogin = document.getElementById('toLogin');
+
+    const loginPhone = document.getElementById('loginPhone');
+    const loginPassword = document.getElementById('loginPassword');
+    const btnLogin = document.getElementById('btnLogin');
+
+    const regName = document.getElementById('regName');
+    const regPhone = document.getElementById('regPhone');
+    const regPassword = document.getElementById('regPassword');
+    const btnRegister = document.getElementById('btnRegister');
+
+    function showLogin() {
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+      authTitle.textContent = 'Masuk';
+      authNote.textContent = 'Gunakan nomor HP dan password untuk masuk.';
+    }
+    function showRegister() {
+      loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
+      authTitle.textContent = 'Daftar Akun';
+      authNote.textContent = 'Buat akun baru untuk mulai menggunakan.';
+    }
+
+    toRegister.addEventListener('click', showRegister);
+    toLogin.addEventListener('click', showLogin);
+
+    // Register
+    btnRegister.addEventListener('click', () => {
+      const name = regName.value.trim();
+      const phone = regPhone.value.trim();
+      const password = regPassword.value.trim();
+
+      if (!name || !phone || !password) {
+        alert('Semua field wajib diisi.');
+        return;
+      }
+      if (!/^\d{10,}$/.test(phone)) {
+        alert('Nomor HP harus angka dan minimal 10 digit.');
+        return;
+      }
+      if (password.length < 6) {
+        alert('Password minimal 6 karakter.');
+        return;
+      }
+
+      const users = loadUsers();
+      if (users.find(u => u.phone === phone)) {
+        alert('Nomor HP sudah terdaftar.');
+        return;
+      }
+
+      users.push({ name, phone, password });
+      saveUsers(users);
+
+      // Buat wallet kosong untuk user ini
+      const wallet = loadWallet();
+      wallet[phone] = { balance: 0, transactions: [] };
+      saveWallet(wallet);
+
+      alert('Pendaftaran berhasil. Silakan masuk.');
+      showLogin();
+      regName.value = '';
+      regPhone.value = '';
+      regPassword.value = '';
+    });
+
+    // Login
+    btnLogin.addEventListener('click', () => {
+      const phone = loginPhone.value.trim();
+      const password = loginPassword.value.trim();
+
+      if (!phone || !password) {
+        alert('Nomor HP dan password wajib diisi.');
+        return;
+      }
+
+      const users = loadUsers();
+      const user = users.find(u => u.phone === phone && u.password === password);
+      if (!user) {
+        alert('Nomor HP atau password salah.');
+        return;
+      }
+
+      // Simpan sesi
+      saveSession({ phone });
+      authOverlay.classList.remove('active');
+      initDashboard();
+    });
+
+    // =========================
+    // DASHBOARD LOGIC
+    // =========================
+    const dashboardPage = document.getElementById('dashboardPage');
+    const headerUserName = document.getElementById('headerUserName');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const historyList = document.getElementById('historyList');
+
+    const btnTopupAction = document.getElementById('btnTopupAction');
+    const btnTransferAction = document.getElementById('btnTransferAction');
+    const btnHistoryAction = document.getElementById('btnHistoryAction');
+    const btnLogoutAction = document.getElementById('btnLogoutAction');
+
+    const topupSection = document.getElementById('topupSection');
+    const transferSection = document.getElementById('transferSection');
+    const historySection = document.getElementById('historySection');
+
+    const topupAmount = document.getElementById('topupAmount');
+    const btnTopup = document.getElementById('btnTopup');
+    const btnCancelTopup = document.getElementById('btnCancelTopup');
+
+    const transferPhone = document.getElementById('transferPhone');
+    const transferAmount = document.getElementById('transferAmount');
+    const btnTransfer = document.getElementById('btnTransfer');
+    const btnCancelTransfer = document.getElementById('btnCancelTransfer');
+
+    let currentUser = null;
+    let currentWallet = null;
+
+    function checkSession() {
+      const session = loadSession();
+      if (!session) {
+        authOverlay.classList.add('active');
+        dashboardPage.classList.remove('active');
+        return false;
+      }
+      const users = loadUsers();
+      const user = users.find(u => u.phone === session.phone);
+      if (!user) {
+        saveSession(null);
+        authOverlay.classList.add('active');
+        dashboardPage.classList.remove('active');
+        return false;
+      }
+      currentUser = user;
+      const wallet = loadWallet();
+      if (!wallet[user.phone]) {
+        wallet[user.phone] = { balance: 0, transactions: [] };
+        saveWallet(wallet);
+      }
+      currentWallet = wallet[user.phone];
+      return true;
+    }
+
+    function formatRupiah(num) {
+      return 'Rp ' + num.toLocaleString('id-ID');
+    }
+
+    function renderBalance() {
+      balanceDisplay.textContent = formatRupiah(currentWallet.balance);
+    }
+
+    function renderHistory() {
+      historyList.innerHTML = '';
+      const txs = currentWallet.transactions || [];
+      if (txs.length === 0) {
+        historyList.innerHTML = '<div class="tx-item">Belum ada transaksi.</div>';
+        return;
+      }
+      const reversed = [...txs].reverse();
+      reversed.forEach(tx => {
+        const div = document.createElement('div');
+        div.className = 'tx-item';
+
+        const typeLabel = tx.type === 'in' ? 'MASUK' : 'KELUAR';
+        const typeClass = tx.type === 'in' ? 'tx-in' : 'tx-out';
+        const desc = tx.type === 'in'
+          ? `Dari: ${tx.from}`
+          : `Ke: ${tx.to}`;
+        const dateStr = new Date(tx.date).toLocaleString('id-ID');
+
+        div.innerHTML = `
+          <div class="tx-row">
+            <span class="tx-type ${typeClass}">${typeLabel}</span>
+            <span class="tx-amount">${formatRupiah(tx.amount)}</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-meta">${desc}</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-meta">${dateStr}</span>
+          </div>
+        `;
+        historyList.appendChild(div);
+      });
+    }
+
+    function hideAllSections() {
+      topupSection.style.display = 'none';
+      transferSection.style.display = 'none';
+    }
+
+    function initDashboard() {
+      if (!checkSession()) return;
+
+      dashboardPage.classList.add('active');
+      authOverlay.classList.remove('active');
+
+      headerUserName.textContent = 'Halo, ' + (currentUser.name || currentUser.phone);
+
+      renderBalance();
+      renderHistory();
+      hideAllSections();
+    }
+
+    // Tombol aksi
+    btnTopupAction.addEventListener('click', () => {
+      hideAllSections();
+      topupSection.style.display = 'block';
+      historySection.style.display = 'none';
+    });
+    btnTransferAction.addEventListener('click', () => {
+      hideAllSections();
+      transferSection.style.display = 'block';
+      historySection.style.display = 'none';
+    });
+    btnHistoryAction.addEventListener('click', () => {
+      hideAllSections();
+      historySection.style.display = 'block';
+    });
+
+    btnLogoutAction.addEventListener('click', () => {
+          if (!confirm('Keluar dari aplikasi?')) return;
+      saveSession(null);
+      currentUser = null;
+      currentWallet = null;
+      authOverlay.classList.add('active');
+      dashboardPage.classList.remove('active');
+      showLogin();
+    });
+
+    // Isi saldo
+    btnTopup.addEventListener('click', () => {
+      const amount = parseInt(topupAmount.value, 10);
+      if (!amount || amount <= 0) {
+        alert('Masukkan jumlah isi saldo yang valid.');
+        return;
+      }
+
+      currentWallet.balance += amount;
+      currentWallet.transactions.push({
+        type: 'in',
+        amount,
+        from: 'Top Up',
+        date: new Date().toISOString()
+      });
+
+      const wallet = loadWallet();
+      wallet[currentUser.phone] = currentWallet;
+      saveWallet(wallet);
+
+      renderBalance();
+      renderHistory();
+      topupAmount.value = '';
+      hideAllSections();
+      historySection.style.display = 'block';
+      alert('Saldo berhasil diisi!');
+    });
+
+    btnCancelTopup.addEventListener('click', () => {
+      hideAllSections();
+      historySection.style.display = 'block';
+    });
+
+    // Transfer
+    btnTransfer.addEventListener('click', () => {
+      const phone = transferPhone.value.trim();
+      const amount = parseInt(transferAmount.value, 10);
+
+      if (!/^\d{10,}$/.test(phone)) {
+        alert('Nomor HP tujuan harus angka dan minimal 10 digit.');
+        return;
+      }
+      if (!amount || amount <= 0) {
+        alert('Masukkan jumlah transfer yang valid.');
+        return;
+      }
+      if (amount > currentWallet.balance) {
+        alert('Saldo tidak mencukupi.');
+        return;
+      }
+      if (phone === currentUser.phone) {
+        alert('Tidak bisa transfer ke nomor sendiri.');
+        return;
+      }
+
+      // Kurangi saldo pengirim
+      currentWallet.balance -= amount;
+      currentWallet.transactions.push({
+        type: 'out',
+        amount,
+        to: phone,
+        date: new Date().toISOString()
+      });
+
+      // Tambah saldo penerima (jika belum ada wallet, buat baru)
+      const wallet = loadWallet();
+      if (!wallet[phone]) {
+        wallet[phone] = { balance: 0, transactions: [] };
+      }
+      wallet[phone].balance += amount;
+      wallet[phone].transactions.push({
+        type: 'in',
+        amount,
+        from: currentUser.phone,
+        date: new Date().toISOString()
+      });
+
+      // Simpan wallet pengirim juga
+      wallet[currentUser.phone] = currentWallet;
+      saveWallet(wallet);
+
+      renderBalance();
+      renderHistory();
+
+      transferPhone.value = '';
+      transferAmount.value = '';
+      hideAllSections();
+      historySection.style.display = 'block';
+
+      alert(`Berhasil mengirim ${formatRupiah(amount)} ke ${phone}`);
+    });
+
+    btnCancelTransfer.addEventListener('click', () => {
+      hideAllSections();
+      historySection.style.display = 'block';
+    });
+
+    // Init saat load
+    if (!checkSession()) {
+      authOverlay.classList.add('active');
+      dashboardPage.classList.remove('active');
+      showLogin();
+    } else {
+      initDashboard();
+    }
+  </script>
+</body>
+</html>
