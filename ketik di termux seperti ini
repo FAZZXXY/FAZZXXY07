@@ -1,0 +1,21 @@
+pkg update && pkg upgrade
+
+pkg install python
+
+pkg install python-pip
+
+pkg install git
+
+git clone https://github.com/DaemonTechX/Otp-Spammer
+
+cd Otp-Spammer
+
+ls
+
+pip install requests
+
+pip install beautifulsoup4
+
+pip install urllib3
+
+python otp.py
